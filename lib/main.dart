@@ -64,26 +64,27 @@ class MyWidget extends StatelessWidget {
 
     final data = [
       _CardData(
-        'Iphone 17',
-        descriptionText: 'ahahahha',
+        'iPhone 17 8/256Gb Black',
+        descriptionText: 'Экран: 6.1" OLED (120 Гц)\nПроцессор: Apple A19\nКамера: 48+12 Мп\nАккумулятор: 4000 мАч',
         icon: Icons.apple,
         imageURL:
-          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR3WBtmM5iATFCf7YUOdqg1aeZda-QLZAleCmlHaiGlTfcObBDGvPu1njKM&s=10'
+          'https://ir.ozone.ru/s3/multimedia-1-6/wc1000/8126773170.jpg'
       ),
       _CardData(
-          'oh',
-          descriptionText: 'ahahahha',
+          'Google Pixel 11 12/512Gb Obsidian',
+          descriptionText: 'Экран: 6.3" OLED (120 Гц)\nПроцессор: Google Tensor G6\nКамера: 50+48+48 Мп\nАккумулятор: 4600 мАч',
           icon: Icons.android,
           imageURL:
-            'https://ir.ozone.ru/s3/multimedia-1-8/wc1000/7546850828.jpg'
+            'https://ir.ozone.ru/s3/multimedia-1-u/wc1000/15240413874.jpg'
       ),
       _CardData(
-          ')',
-          descriptionText: 'mb',
+          'Samsung Galaxy S26 12/256Gb Black',
+          descriptionText: 'Экран: 6.2" AMOLED (120 Гц)\nПроцессор: Snapdragon 8 Gen 5\nКамера: 50+12+10 Мп\nАккумулятор: 4200 мАч',
           icon: Icons.android,
           imageURL:
-            'https://ir.ozone.ru/s3/multimedia-1-g/wc1000/15030916504.jpg'
+            'https://ir.ozone.ru/s3/multimedia-1-s/wc1000/9135512056.jpg'
       ),
+
     ];
     return Center(
       child: SingleChildScrollView(
@@ -148,7 +149,7 @@ class _Card extends StatelessWidget {
                 width: 90,
                 child: Image.network(
                     imageURL ?? '',
-                    fit: BoxFit.cover,
+                    fit: BoxFit.contain,
                     errorBuilder: (_, __, ___) => const Placeholder(),
               ),
             ),
@@ -161,7 +162,7 @@ class _Card extends StatelessWidget {
                   children: [
                     Text(
                         text,
-                        style: Theme.of(context).textTheme.headlineLarge,
+                        style: const TextStyle(fontSize: 18, fontWeight:  FontWeight.bold)
                     ),
                     Text(
                       descriptionText,
