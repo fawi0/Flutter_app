@@ -24,9 +24,9 @@ String get description {
 extension PaymentMethodX on PaymentMethod {
   double get feePercentage {
     return switch (this) {
-      PaymentMethod.card => 0.02,   // 2% комиссия
-      PaymentMethod.sbp => 0.0,     // Без комиссии
-      PaymentMethod.crypto => 0.01, // 1% комиссия
+      PaymentMethod.card => 0.02,
+      PaymentMethod.sbp => 0.0,
+      PaymentMethod.crypto => 0.1,
       PaymentMethod.cash => 0.0,
     };
   }
@@ -126,7 +126,6 @@ class Order {
   })  : orderNumber = ++_orderCounter,
         status = OrderStatus.created;
 
-  // Подсчет суммы заказа с помощью анонимной функции в методе fold
   double get subtotal => items.fold(0.0, (sum, item) => sum + item.price);
 
   double get totalWithFee {
@@ -189,7 +188,7 @@ class ShopEngine {
         price: 69990.0,
         brand: Brand.xiaomi,
         ramGb: 16,
-        storageGb: 512,
+        storageGb: 128,
         stockCount: 4,
       ),
     ]);
@@ -266,10 +265,8 @@ Future<void> main() async {
     paymentMethod: PaymentMethod.card,
   );
 
-  // 6. Обрабатываем заказ асинхронно
   final isSuccess = await shop.processOrder(myOrder);
 
-  // 7. Демонстрация Future API (.then), как в конце лекции
   if (isSuccess) {
     Future.delayed(const Duration(milliseconds: 400)).then((_) {
       myOrder.status = OrderStatus.shipped;
