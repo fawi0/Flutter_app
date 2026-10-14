@@ -1,13 +1,9 @@
 import 'dart:async';
 
-// ==================== 1. ENUMS (Перечисления) ====================
 enum Brand { apple, samsung, google, xiaomi, unknown }
-
 enum OrderStatus { created, processing, paid, shipped, cancelled }
-
 enum PaymentMethod { card, sbp, crypto, cash }
 
-// ==================== 2. EXTENSIONS (Расширения) ====================
 extension OrderStatusX on OrderStatus {
 String get description {
   switch (this) {
@@ -26,7 +22,6 @@ String get description {
 }
 
 extension PaymentMethodX on PaymentMethod {
-  // Возвращает процент комиссии в зависимости от способа оплаты
   double get feePercentage {
     return switch (this) {
       PaymentMethod.card => 0.02,   // 2% комиссия
@@ -41,19 +36,14 @@ extension PriceFormatterX on double {
   String toRubles() => '${toStringAsFixed(2)} руб.';
 }
 
-// ==================== 3. КЛАССЫ И ООП ====================
-// Абстрактный базовый класс для любого товара в магазине
 abstract class StoreItem {
   final String id;
   final String title;
-  double _basePrice; // Приватное поле
+  double _basePrice;
 
   StoreItem(this.id, this.title, this._basePrice);
 
-  // Геттер для получения цены
   double get price => _basePrice;
-
-  // Сеттер с валидацией (как в лекции)
   set price(double newPrice) {
     if (newPrice >= 0) {
       _basePrice = newPrice;
@@ -65,14 +55,13 @@ abstract class StoreItem {
   String get info;
 }
 
-// Класс смартфона, наследующийся от базового товара
 class Smartphone extends StoreItem {
   final Brand brand;
   final int ramGb;
   final int storageGb;
-  int stockCount;
+  int stockCount;//количество на складе
 
-  // Основной конструктор с параметрами и вызовом super
+
   Smartphone({
     required String id,
     required String title,
@@ -83,7 +72,6 @@ class Smartphone extends StoreItem {
     this.stockCount = 1,
   }) : super(id, title, price);
 
-  // Именованный конструктор для быстрого создания флагманов Apple
   Smartphone.appleFlagship({
     required String id,
     required String modelName,
@@ -101,14 +89,13 @@ class Smartphone extends StoreItem {
       '[${brand.name.toUpperCase()}] $title ($ramGb/$storageGb ГБ) — ${price.toRubles()} (В наличии: $stockCount шт.)';
 }
 
-// ==================== 4. GENERICS (Дженерики) ====================
-// Универсальный репозиторий для хранения любых товаров, наследуемых от StoreItem
+
 class StorageRepository<T extends StoreItem> {
   final List<T> _items = [];
 
   void add(T item) => _items.add(item);
 
-  void addAll(List<T> newItems) => _ite ms.addAll(newItems);
+  void addAll(List<T> newItems) => _items.addAll(newItems);
 
   List<T> get allItems => List.unmodifiable(_items);
 
@@ -124,9 +111,8 @@ class StorageRepository<T extends StoreItem> {
   }
 }
 
-// Класс заказа
 class Order {
-  static int _orderCounter = 100; // Статическое поле для генерации номеров
+  static int _orderCounter = 100;
   final int orderNumber;
   final String customerName;
   final List<Smartphone> items;
@@ -149,23 +135,18 @@ class Order {
   }
 
   void printReceipt() {
-    print('\n========================================');
     print('ЧЕК ЗАКАЗА #$orderNumber для клиента: $customerName');
-    print('Статус: ${status.description}');
-    print('----------------------------------------');
-    // Классический цикл for со счетчиком
+    print('Статус: ${status.description}\n');
     for (int i = 0; i < items.length; i++) {
       print('${i + 1}. ${items[i].title} — ${items[i].price.toRubles()}');
     }
-    print('----------------------------------------');
     print('Сумма без комиссии: ${subtotal.toRubles()}');
     print('Способ оплаты: ${paymentMethod.name} (Комиссия: ${(paymentMethod.feePercentage * 100)}%)');
     print('ИТОГО К ОПЛАТЕ: ${totalWithFee.toRubles()}');
-    print('========================================\n');
+    print('\n');
   }
 }
 
-// ==================== 5. АСИНХРОННОСТЬ (Future) И ЛОГИКА ====================
 class ShopEngine {
   final StorageRepository<Smartphone> warehouse;
 
@@ -173,7 +154,7 @@ class ShopEngine {
 
   // Асинхронная имитация загрузки базы данных с сервера
   Future<void> initializeDatabase() async {
-    print('⏳ Подключение к серверу склада...');
+    print('Подключение к серверу склада...');
     await Future.delayed(const Duration(milliseconds: 600));
 
     warehouse.addAll([
@@ -213,29 +194,25 @@ class ShopEngine {
       ),
     ]);
 
-    print('✅ База данных успешно загружена! Товаров в каталоге: ${warehouse.allItems.length}\n');
+    print('База данных загружена. Товаров в каталоге: ${warehouse.allItems.length}\n');
   }
 
-  // Асинхронная обработка заказа с использованием циклов и Future
   Future<bool> processOrder(Order order) async {
-    print('🔄 Начинаем обработку заказа #${order.orderNumber}...');
+    print('Обработка заказа #${order.orderNumber}...');
     order.status = OrderStatus.processing;
     await Future.delayed(const Duration(milliseconds: 500));
 
-    // Проверим наличие товаров с помощью цикла while, continue и break
     int index = 0;
     bool allAvailable = true;
-
     while (index < order.items.length) {
       final phone = order.items[index];
       index++;
-
       if (phone.isInStock) {
-        continue; // Если товар есть, переходим к следующему
+        continue;
       } else {
-        print('❌ Ошибка комплектации: смартфон "${phone.title}" закончился на складе!');
+        print('Ошибка комплектации: смартфон "${phone.title}" закончился на складе!');
         allAvailable = false;
-        break; // Прерываем проверку при первой же нехватке товара
+        break;
       }
     }
 
@@ -244,45 +221,40 @@ class ShopEngine {
       return false;
     }
 
-    // Уменьшаем остатки на складе (цикл for-in)
     for (final phone in order.items) {
       phone.stockCount -= 1;
     }
 
-    print('💳 Проведение транзакции через шлюз (${order.paymentMethod.name})...');
+    print('Проведение транзакции через (${order.paymentMethod.name})...');
     await Future.delayed(const Duration(milliseconds: 800));
 
     order.status = OrderStatus.paid;
-    print('✅ Оплата прошла успешно!');
+    print('Оплата прошла успешно!');
     return true;
   }
 }
 
-// ==================== ТОЧКА ВХОДА (MAIN) ====================
+
 Future<void> main() async {
-  print('=== ЗАПУСК СИСТЕМЫ УПРАВЛЕНИЯ МАГАЗИНОМ ===\n');
+  print('\n');
 
   final storage = StorageRepository<Smartphone>();
   final shop = ShopEngine(storage);
 
-  // 1. Ждем инициализации БД
   await shop.initializeDatabase();
 
-  // 2. Используем сеттер для изменения цены одного из товаров (акция)
   final firstPhone = storage.allItems.first;
-  print('🔥 Снижение цены на ${firstPhone.title}!');
+  print('Снижение цены на ${firstPhone.title}!');
   firstPhone.price = 94990.0;
 
-  // 3. Выводим все товары через анонимную функцию в forEach
   print('\n--- Текущий каталог всех смартфонов ---');
   storage.allItems.forEach((phone) => print(phone.info));
 
-  // 4. Фильтрация с помощью Generics-метода и анонимной функции
   final availableFlagships = storage.filter(
         (phone) => phone.isInStock && phone.storageGb >= 256,
   );
 
-  print('\n--- Доступные для покупки смартфоны (от 256 ГБ) ---');
+  print('\nДоступные для покупки смартфоны (от 256 ГБ)');
   for (final item in availableFlagships) {
     print('• ${item.title} (${item.price.toRubles()})');
   }
