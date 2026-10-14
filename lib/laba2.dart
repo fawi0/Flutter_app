@@ -1,24 +1,26 @@
 import 'dart:async';
 
 enum Brand { apple, samsung, google, xiaomi, unknown }
+
 enum OrderStatus { created, processing, paid, shipped, cancelled }
+
 enum PaymentMethod { card, sbp, crypto, cash }
 
 extension OrderStatusX on OrderStatus {
-String get description {
-  switch (this) {
-    case OrderStatus.created:
-      return 'Заказ создан и ожидает подтверждения';
-    case OrderStatus.processing:
-      return 'Заказ комплектуется на складе';
-    case OrderStatus.paid:
-      return 'Заказ успешно оплачен';
-    case OrderStatus.shipped:
-      return 'Заказ передан в курьерскую службу';
-    case OrderStatus.cancelled:
-      return 'Заказ отменен';
+  String get description {
+    switch (this) {
+      case OrderStatus.created:
+        return 'Заказ создан и ожидает подтверждения';
+      case OrderStatus.processing:
+        return 'Заказ комплектуется на складе';
+      case OrderStatus.paid:
+        return 'Заказ успешно оплачен';
+      case OrderStatus.shipped:
+        return 'Заказ передан в курьерскую службу';
+      case OrderStatus.cancelled:
+        return 'Заказ отменен';
+    }
   }
-}
 }
 
 extension PaymentMethodX on PaymentMethod {
@@ -44,6 +46,7 @@ abstract class StoreItem {
   StoreItem(this.id, this.title, this._basePrice);
 
   double get price => _basePrice;
+
   set price(double newPrice) {
     if (newPrice >= 0) {
       _basePrice = newPrice;
@@ -59,8 +62,7 @@ class Smartphone extends StoreItem {
   final Brand brand;
   final int ramGb;
   final int storageGb;
-  int stockCount;//количество на складе
-
+  int stockCount; //количество на складе
 
   Smartphone({
     required String id,
@@ -78,9 +80,9 @@ class Smartphone extends StoreItem {
     required double price,
     required this.storageGb,
     this.stockCount = 5,
-  })  : brand = Brand.apple,
-        ramGb = 8,
-        super(id, modelName, price);
+  }) : brand = Brand.apple,
+       ramGb = 8,
+       super(id, modelName, price);
 
   bool get isInStock => stockCount > 0;
 
@@ -88,7 +90,6 @@ class Smartphone extends StoreItem {
   String get info =>
       '[${brand.name.toUpperCase()}] $title ($ramGb/$storageGb ГБ) — ${price.toRubles()} (В наличии: $stockCount шт.)';
 }
-
 
 class StorageRepository<T extends StoreItem> {
   final List<T> _items = [];
@@ -99,7 +100,6 @@ class StorageRepository<T extends StoreItem> {
 
   List<T> get allItems => List.unmodifiable(_items);
 
-  // Поиск элементов с использованием анонимной функции-предиката
   List<T> filter(bool Function(T item) predicate) {
     final List<T> result = [];
     for (final item in _items) {
@@ -123,8 +123,8 @@ class Order {
     required this.customerName,
     required this.items,
     required this.paymentMethod,
-  })  : orderNumber = ++_orderCounter,
-        status = OrderStatus.created;
+  }) : orderNumber = ++_orderCounter,
+       status = OrderStatus.created;
 
   double get subtotal => items.fold(0.0, (sum, item) => sum + item.price);
 
@@ -140,7 +140,9 @@ class Order {
       print('${i + 1}. ${items[i].title} — ${items[i].price.toRubles()}');
     }
     print('Сумма без комиссии: ${subtotal.toRubles()}');
-    print('Способ оплаты: ${paymentMethod.name} (Комиссия: ${(paymentMethod.feePercentage * 100)}%)');
+    print(
+      'Способ оплаты: ${paymentMethod.name} (Комиссия: ${(paymentMethod.feePercentage * 100)}%)',
+    );
     print('ИТОГО К ОПЛАТЕ: ${totalWithFee.toRubles()}');
     print('\n');
   }
@@ -151,7 +153,6 @@ class ShopEngine {
 
   ShopEngine(this.warehouse);
 
-  // Асинхронная имитация загрузки базы данных с сервера
   Future<void> initializeDatabase() async {
     print('Подключение к серверу склада...');
     await Future.delayed(const Duration(milliseconds: 600));
@@ -193,7 +194,9 @@ class ShopEngine {
       ),
     ]);
 
-    print('База данных загружена. Товаров в каталоге: ${warehouse.allItems.length}\n');
+    print(
+      'База данных загружена. Товаров в каталоге: ${warehouse.allItems.length}\n',
+    );
   }
 
   Future<bool> processOrder(Order order) async {
@@ -209,7 +212,9 @@ class ShopEngine {
       if (phone.isInStock) {
         continue;
       } else {
-        print('Ошибка комплектации: смартфон "${phone.title}" закончился на складе!');
+        print(
+          'Ошибка комплектации: смартфон "${phone.title}" закончился на складе!',
+        );
         allAvailable = false;
         break;
       }
@@ -233,7 +238,6 @@ class ShopEngine {
   }
 }
 
-
 Future<void> main() async {
   print('\n');
 
@@ -250,7 +254,7 @@ Future<void> main() async {
   storage.allItems.forEach((phone) => print(phone.info));
 
   final availableFlagships = storage.filter(
-        (phone) => phone.isInStock && phone.storageGb >= 256,
+    (phone) => phone.isInStock && phone.storageGb >= 256,
   );
 
   print('\nДоступные для покупки смартфоны (от 256 ГБ)');
@@ -258,7 +262,6 @@ Future<void> main() async {
     print('• ${item.title} (${item.price.toRubles()})');
   }
 
-  // 5. Создаем заказ для клиента
   final myOrder = Order(
     customerName: 'Герасин Иван',
     items: [availableFlagships[0], availableFlagships[1]],
